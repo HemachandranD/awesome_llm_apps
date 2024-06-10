@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+langchain = "*"
+black = "*"
+openai = "*"
+langchain-openai = "*"
+wikipedia = "*"
+newsapi-python = "*"
+python-dotenv = "*"
+langchainhub = "*"
+isort = "*"
+langserve = "*"
+fastapi = "*"
+sse-starlette = "*"
+
+[dev-packages]
+ipykernel = "*"
+pandas = "*"
+
+[requires]
+python_version = "3.12"
