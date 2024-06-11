@@ -15,7 +15,7 @@ def create_agent_executor():
         prompt_template = """Given the {input} understand on which category the user wants to read the news. 
         The category should be one of these 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'. 
         Get the News Title and URL of the content. Your answer should contain only the News Title and the URL of the content in 
-        simple readable format without any special characters. If the input is anything else, respond with 'Invalid Input'"""
+        simple readable format without any special characters. If your understanding is not related to news, respond with 'Invalid Input'"""
         prompt = ChatPromptTemplate.from_messages(
             [
                 SystemMessagePromptTemplate.from_template("You are a helpful assistant."),
