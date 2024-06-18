@@ -1,3 +1,4 @@
+from custom_tools import scrape_top_news
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -6,8 +7,6 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
 )
 from langchain_openai import ChatOpenAI
-
-from custom_tools import scrape_top_news
 
 
 def create_agent_executor():
@@ -18,7 +17,9 @@ def create_agent_executor():
         should contain only the News Title and the URL of the content in simple readable format without any special characters."""
         prompt = ChatPromptTemplate.from_messages(
             [
-                SystemMessagePromptTemplate.from_template("You are a helpful assistant."),
+                SystemMessagePromptTemplate.from_template(
+                    "You are a helpful assistant."
+                ),
                 MessagesPlaceholder(variable_name="chat_history", optional=True),
                 HumanMessagePromptTemplate.from_template(prompt_template),
                 MessagesPlaceholder(variable_name="agent_scratchpad"),
@@ -30,7 +31,10 @@ def create_agent_executor():
         agent_tools = [scrape_top_news]
         langchain_agent = create_openai_tools_agent(llm, agent_tools, prompt)
         agent_executor = AgentExecutor(
-            agent=langchain_agent, tools=agent_tools, verbose=True, return_intermediate_steps=False
+            agent=langchain_agent,
+            tools=agent_tools,
+            verbose=True,
+            return_intermediate_steps=False,
         )
 
         return agent_executor
