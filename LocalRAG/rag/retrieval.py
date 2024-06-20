@@ -7,7 +7,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 
 def format_docs(docs):
-    return "\n\n".join([doc.page_content for doc in docs])
+    return "\n\n".join(doc.page_content for doc in docs)
 
 def run_llm(qdrant, query):
     llm = ChatOllama(model="llama3")
@@ -20,19 +20,20 @@ def run_llm(qdrant, query):
         ("human", "{question}"),
     ])
 
-    chain = ({"context": qdrant.as_retriever(), "input": RunnablePassthrough()}
-                    | custom_rag_prompt
+    chain = ({"context": qdrant.as_retriever() | format_docs, "input": RunnablePassthrough()}
+                    | retrieval_qa_chat_prompt
                     | llm)
 
     chat_chain = RunnableWithMessageHistory(
         runnable=chain,
         get_session_history=lambda session_id: RedisChatMessageHistory(
-            session_id=session_id, url="redis://localhost:6379"
-        ),
-        input_message_key="question",
+        session_id, url="redis://localhost:6379"),
+        input_message_key="input",
         history_message_key="chat_history",
     )
-    config = {"configurable": {"session_id": "cr7"}}
+    
 
-    return chat_chain.invoke({"question": "what is the name of the restaurant?"}, config=config)
+    # return chat_chain
+    # return chat_chain.invoke("what is the name of the restaurant?", config = {"configurable": {"session_id": "cr7"}})
+    return chat_chain.invoke({"input": query}, config = {"configurable": {"session_id": "cr7"}})
     # return chain.invoke("what is the name of the restaurant?")
