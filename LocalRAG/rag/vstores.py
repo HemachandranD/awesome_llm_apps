@@ -16,7 +16,9 @@ def create_vstores(documents: list):
         embeddings,
         path="/tmp/local_qdrant",
         collection_name="my_documents",
+        force_recreate=True,
     )
+
     print("****Loading to Vectorstore, Done! ***")
 
-    return qdrant
+    return qdrant, embeddings
