@@ -16,6 +16,8 @@ isort = "*"
 langserve = "*"
 fastapi = "*"
 sse-starlette = "*"
+langchain-qdrant = "*"
+langchain-huggingface = "*"
 
 [dev-packages]
 ipykernel = "*"
