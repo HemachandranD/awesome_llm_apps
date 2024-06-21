@@ -3,7 +3,7 @@ from rag.retrieval import run_llm
 from rag.vstores import create_vstores
 from langchain_qdrant import Qdrant
 
-query = "What is the name of the restaurant?"
+user_question = "What is the name of the restaurant?"
 
 if __name__ == "__main__":
     data = load_data(
@@ -11,6 +11,6 @@ if __name__ == "__main__":
     )
     documents = prepare_chunk(data)
     qdrant, embeddings = create_vstores(documents)
-    response = run_llm(qdrant, query)
+    response = run_llm(embeddings, user_question)
     print(response)
-    # print(qdrant.similarity_search("what is the name of the restaurant?"))
+    

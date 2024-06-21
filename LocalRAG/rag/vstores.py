@@ -2,7 +2,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import Qdrant
 
-
 # Create Vectorstores
 def create_vstores(documents: list):
     print("****Local Embedding is in progress, Please wait... ***")
@@ -14,7 +13,7 @@ def create_vstores(documents: list):
     qdrant = Qdrant.from_documents(
         documents,
         embeddings,
-        path="/tmp/local_qdrant",
+        url="http://localhost:6333",
         collection_name="my_documents",
         force_recreate=True,
     )

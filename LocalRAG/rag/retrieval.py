@@ -1,26 +1,25 @@
 import logging
 from langchain import hub
+from operator import itemgetter
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import PromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables.history import RunnableWithMessageHistory, BaseChatMessageHistory
+from langchain_core.messages import BaseMessage, AIMessage
+from langchain_core.pydantic_v1 import BaseModel, Field
+from typing import List
+from langchain_qdrant import Qdrant
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
 
-
-def run_llm(qdrant, query):
-    logging.debug(f"Initial query: {query} (type: {type(query)})")
+def run_llm(embeddings, user_question):
     
     llm = ChatOllama(model="llama3")
-    retrieval_qa_chat_prompt = hub.pull("langchain-ai/retrieval-qa-chat")
 
     custom_rag_prompt = ChatPromptTemplate.from_messages([
         ("system", "Answer any use questions based solely on the context below:\n{context}"),
         MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}"),
+        ("human", "{question}"),
     ])
 
     def custom_get_relevant_documents(query, retriever):
@@ -29,24 +28,25 @@ def run_llm(qdrant, query):
 
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
-
-    retriever = qdrant.as_retriever()
     
-    custom_retriever = lambda query: custom_get_relevant_documents(query, retriever)
+    qdrant = Qdrant.from_existing_collection(
+    embedding=embeddings,
+    collection_name="my_documents",
+    url="http://localhost:6333")
 
-    context = itemgetter("input") | RunnableLambda(custom_retriever) | format_docs
+    custom_retriever = lambda query: custom_get_relevant_documents(query, retriever= qdrant.as_retriever())
 
-    chain = RunnablePassthrough().assign(context=context) | custom_rag_prompt | llm
+    context = {"question": RunnablePassthrough.assign(question=itemgetter("question"))} | RunnableLambda(custom_retriever) | format_docs
+
+    chain = RunnablePassthrough.assign(context=context) | custom_rag_prompt | llm
 
     chat_chain = RunnableWithMessageHistory(
         runnable= chain,
-        get_session_history=lambda session_id: RedisChatMessageHistory(
-            session_id, url="redis://localhost:6379"),
-        input_message_key="input",
+        get_session_history=lambda session_id : RedisChatMessageHistory(
+        session_id, url="redis://localhost:6379"
+        ),
+        input_message_key="question",
         history_message_key="chat_history",
     )
 
-    logging.log("Invoking chat chain...")
-    response = chat_chain.invoke(input={"input": query}, config={"configurable": {"session_id": "cr7"}})
-    logging.log(f"Response: {response}")
-    return response
+    return chat_chain.invoke({"question": user_question}, config={"configurable": {"session_id": "cr7"}})
