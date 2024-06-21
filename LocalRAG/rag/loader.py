@@ -29,7 +29,7 @@ def prepare_chunk(data: list):
         data: list of Documents
     Returns:    list of Chunks
     """
-    text_splitter = RecursiveCharacterTextSplitter(
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=600, chunk_overlap=50, separators=["\n\n", "\n", " ", ""]
     )
     documents = text_splitter.split_documents(data)

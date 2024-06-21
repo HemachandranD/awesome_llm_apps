@@ -1,4 +1,5 @@
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import Qdrant
 
 
@@ -6,7 +7,6 @@ from langchain_qdrant import Qdrant
 def create_vstores(documents: list):
     print("****Local Embedding is in progress, Please wait... ***")
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
     print("****Loading to Vectorstore, Please wait... ***")
