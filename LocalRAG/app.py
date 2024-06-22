@@ -6,8 +6,8 @@ import logging
 
 # Creating an object
 logger = logging.getLogger()
-
-question = "It is used for"
+first_question = "What is Langgraph?"
+second_question = "It is used for?"
 
 if __name__ == "__main__":
     data = load_data(
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     )
     documents = prepare_chunk(data)
     vs_conn = create_vstores(documents)
-    response = run_llm(model_name="llama3", user_question=question, vstore_connection=None)
+    response = run_llm(model_name="llama3", user_question=first_question, vstore_connection=None)
     type(response)
     print(response.content)
     
