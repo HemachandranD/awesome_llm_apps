@@ -3,11 +3,11 @@ from rag.retrieval import run_llm
 from rag.vstores import create_vstores
 from langchain_qdrant import Qdrant
 
-user_question = "What is the name of the restaurant?"
+user_question = "What is the name of the restaurant and who is the owner?"
 
 if __name__ == "__main__":
     data = load_data(
-        "Text", "/teamspace/studios/this_studio/awesome_llm_apps/LocalRAG/yelp.txt"
+        "Text", "/teamspace/studios/this_studio/awesome_llm_apps/LocalRAG/yelp_review.txt"
     )
     documents = prepare_chunk(data)
     qdrant, embeddings = create_vstores(documents)

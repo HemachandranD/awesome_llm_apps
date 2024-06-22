@@ -10,6 +10,9 @@ from langchain_core.messages import BaseMessage, AIMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import List
 from langchain_qdrant import Qdrant
+from langchain_core.callbacks import CallbackManagerForRetrieverRun
+from langchain_core.documents import Document
+from langchain_core.retrievers import BaseRetriever
 
 
 def run_llm(embeddings, user_question):
@@ -24,7 +27,7 @@ def run_llm(embeddings, user_question):
 
     def custom_get_relevant_documents(query, retriever):
         assert isinstance(query, str)
-        return retriever.get_relevant_documents(query)
+        return retriever.invoke(query)
 
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
@@ -36,17 +39,14 @@ def run_llm(embeddings, user_question):
 
     custom_retriever = lambda query: custom_get_relevant_documents(query, retriever= qdrant.as_retriever())
 
-    context = {"question": RunnablePassthrough.assign(question=itemgetter("question"))} | RunnableLambda(custom_retriever) | format_docs
+    context = itemgetter("question") | RunnableLambda(custom_retriever) | format_docs
 
     chain = RunnablePassthrough.assign(context=context) | custom_rag_prompt | llm
 
     chat_chain = RunnableWithMessageHistory(
-        runnable= chain,
-        get_session_history=lambda session_id : RedisChatMessageHistory(
-        session_id, url="redis://localhost:6379"
-        ),
-        input_message_key="question",
-        history_message_key="chat_history",
-    )
+        chain,
+        RedisChatMessageHistory,
+        input_messages_key="question",
+        history_messages_key="chat_history")
 
     return chat_chain.invoke({"question": user_question}, config={"configurable": {"session_id": "cr7"}})
