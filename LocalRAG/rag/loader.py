@@ -22,6 +22,14 @@ def load_data(file_type: str, file_loc: str)->List[Document]:
         elif file_type == "Text":
             loader = TextLoader(file_loc)
             data = loader.load()
+        
+        elif file_type == "DOCX":
+            loader = TextLoader(file_loc)
+            data = loader.load()
+        
+        elif file_type == "Markdown":
+            loader = TextLoader(file_loc)
+            data = loader.load()
         logger.info("Loaded the Document")
         
         return data
@@ -36,7 +44,7 @@ def prepare_chunk(data: list)->List[Document]:
     """Prepare Chunks
     Args:
         data: list of Documents
-    Returns:    list of Chunks
+    Returns: list of Chunks
     """
     try:
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
