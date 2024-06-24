@@ -2,6 +2,7 @@ import logging
 from io import BytesIO
 from typing import List
 
+import streamlit as st
 from langchain_core.documents import Document
 from rag.loader import load_data, prepare_chunk
 from rag.retrieval import run_llm
@@ -13,10 +14,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-def loader(file: BytesIO):
+def loader(file: BytesIO, file_loc: str):
     try:
         file_type = check_valid_file(file)
-        data = load_data(file_type=file_type, file_loc=file)
+        data = load_data(file_type=file_type, file_loc=file_loc)
         documents, chunks = prepare_chunk(data)
         if chunks == 0:
             logger.error("No data found, Please upload a file with data")
@@ -25,7 +26,7 @@ def loader(file: BytesIO):
         return documents
 
     except Exception as e:
-        logger.error(f"An error occurred in loader: {str(e)}")
+        st.info(f"An error occurred in loader: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")
 
 
@@ -36,15 +37,20 @@ def vstores(documents: List[Document]):
         return vs_conn
 
     except Exception as e:
-        logger.error(f"An error occurred in vstores: {str(e)}")
+        st.info(f"An error occurred in vstores: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")
 
 
 def retrieval(model_name: str, user_question: str, vstore_connection=None):
-    response = run_llm(
-        model_name=model_name,
-        user_question=user_question,
-        vstore_connection=vstore_connection,
-    )
+    try:
+        response = run_llm(
+            model_name=model_name,
+            user_question=user_question,
+            vstore_connection=vstore_connection,
+        )
 
-    return response.content
+        return response.content
+
+    except Exception as e:
+        st.info(f"An error occurred in retrieval: {str(e)}")
+        raise SystemExit(f"Exiting due to the error: {str(e)}")

@@ -1,3 +1,4 @@
+import os
 import time
 
 import streamlit as st
@@ -15,7 +16,6 @@ st.set_page_config(
     menu_items={"About": "# This is an *extremely* cool Local RAG app!"},
 )
 st.header("📝 LocalRAG")
-# st.title("📝 LocalRAG")
 
 with st.sidebar:
     # anthropic_api_key = st.text_input("Anthropic API Key", key="file_qa_api_key", type="password")
@@ -23,23 +23,20 @@ with st.sidebar:
 
 uploaded_file = st.file_uploader("Upload a File", type=("txt", "md", "pdf", "docx"))
 
-question = st.text_input(
-    "Ask something about the article",
-    placeholder="Can you give me a short summary?",
-    disabled=not uploaded_file,
-)
-
 
 def setup():
     if not uploaded_file:
         st.stop()
 
     if uploaded_file:
-        st.info("File uploaded Sucessfully!")
         st.toast("File uploaded Sucessfully!", icon="✅")
         time.sleep(0.5)
-        documents = loader(file=uploaded_file)
 
+        with open(uploaded_file.name, mode="wb") as w:
+            w.write(uploaded_file.getvalue())
+
+        documents = loader(file=uploaded_file, file_loc=uploaded_file.name)
+        os.remove(uploaded_file.name)
         if documents is None:
             st.info("No data found, Please be responsible and upload a file with data")
             st.stop()

@@ -28,7 +28,7 @@ def load_data(file_type: str, file_loc: str) -> List[Document]:
             data = loader.load()
 
         elif file_type == "Text":
-            loader = TextLoader(file_loc)
+            loader = TextLoader(r"{}".format(file_loc))
             data = loader.load()
 
         elif file_type == "DOCX":
