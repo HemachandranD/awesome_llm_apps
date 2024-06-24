@@ -57,12 +57,20 @@ def welcome_chat():
 
 
 def rag_chat():
+    # if "user_prompt_history" not in st.session_state:
+    #     st.session_state["user_prompt_history"] = []
+
+    # if "chat_answers_history" not in st.session_state:
+    #     st.session_state["chat_answers_history"] = []
+
     st.session_state.messages.append({"role": "user", "content": prompt})
+    # st.session_state["user_prompt_history"].append(prompt)
     st.chat_message("user").write(prompt)
     response = retrieval(
         model_name="phi3", user_question=prompt, vstore_connection=None
     )
     st.session_state.messages.append({"role": "assistant", "content": response})
+    # st.session_state["chat_answers_history"].append(response)
     st.chat_message("assistant").write(response)
 
 
