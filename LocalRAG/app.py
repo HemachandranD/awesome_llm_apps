@@ -1,8 +1,9 @@
-import streamlit as st
-from localrag import loader, vstores, retrieval
-import logging
 import time
+
+import streamlit as st
 from streamlit.logger import get_logger
+
+from localrag import loader, retrieval, vstores
 
 logger = get_logger(__name__)
 
@@ -28,45 +29,45 @@ question = st.text_input(
     disabled=not uploaded_file,
 )
 
+
 def setup():
     if not uploaded_file:
         st.stop()
 
     if uploaded_file:
         st.info("File uploaded Sucessfully!")
-        st.toast(f"File uploaded Sucessfully!", icon="✅")
+        st.toast("File uploaded Sucessfully!", icon="✅")
         time.sleep(0.5)
-        documents=loader(file=uploaded_file)
+        documents = loader(file=uploaded_file)
 
-        if documents == None:
+        if documents is None:
             st.info("No data found, Please be responsible and upload a file with data")
             st.stop()
 
-        elif documents != None:
+        elif documents is not None:
             with st.spinner("Indexing document... This may take a while⏳"):
-                vs_conn=vstores(documents=documents)
-                st.toast(f"Indexing Completed", icon="🚀")
+                vs_conn = vstores(documents=documents)
+                st.toast("Indexing Completed", icon="🚀")
                 time.sleep(0.5)
-        
+
     return vs_conn
 
-def rag_chat():
+
+def rag_chat(vs_conn, prompt: str):
     if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+        st.session_state["messages"] = [
+            {"role": "assistant", "content": "How can I help you?"}
+        ]
 
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
 
     if prompt := st.chat_input():
-        if not openai_api_key:
-            st.info("Please add your OpenAI API key to continue.")
-            st.stop()
-
-        # client = OpenAI(api_key=openai_api_key)
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        # response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
-        response = retrieval(model_name="llama3", user_question=prompt , vstore_connection=vs_conn)
+        response = retrieval(
+            model_name="llama3", user_question=prompt, vstore_connection=vs_conn
+        )
         msg = response.content
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
@@ -74,7 +75,7 @@ def rag_chat():
 
 def main():
     vs_conn = setup()
-    answer = retrieval(model_name="llama3", user_question=question , vstore_connection=vs_conn)
+    rag_chat(vs_conn, question)
 
 
 if __name__ == "__main__":

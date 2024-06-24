@@ -1,3 +1,6 @@
+from io import BytesIO
+
+
 def check_valid_file(file: BytesIO) -> str:
     """Reads an uploaded file and returns a File object"""
     if file.name.lower().endswith(".docx"):
