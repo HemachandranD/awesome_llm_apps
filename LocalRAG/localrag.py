@@ -48,7 +48,7 @@ def retrieval(model_name: str, user_question: str, vstore_connection=None):
             user_question=user_question,
             vstore_connection=vstore_connection,
         )
-
+        st.info(response)
         return response.content
 
     except Exception as e:

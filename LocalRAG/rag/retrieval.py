@@ -69,7 +69,7 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
 
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
-            {"question": user_question}, config={"configurable": {"session_id": "cr7"}}
+            {"question": user_question}, config={"configurable": {"session_id": "c8r7"}}
         )
 
     except Exception as e:
