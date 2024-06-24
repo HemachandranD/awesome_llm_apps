@@ -3,6 +3,7 @@ from langchain_qdrant import Qdrant
 import logging
 
 # Creating an object
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 # Create Vectorstores

@@ -2,10 +2,12 @@ from typing import Any, Dict, List
 import logging
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader, UnstructuredMarkdownLoader
 
 # Creating an object
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
+
 
 # Load Data
 def load_data(file_type: str, file_loc: str)->List[Document]:
@@ -24,11 +26,11 @@ def load_data(file_type: str, file_loc: str)->List[Document]:
             data = loader.load()
         
         elif file_type == "DOCX":
-            loader = TextLoader(file_loc)
+            loader = Docx2txtLoader(file_loc)
             data = loader.load()
         
         elif file_type == "Markdown":
-            loader = TextLoader(file_loc)
+            loader = UnstructuredMarkdownLoader(file_loc)
             data = loader.load()
         logger.info("Loaded the Document")
         
@@ -53,7 +55,7 @@ def prepare_chunk(data: list)->List[Document]:
         documents = text_splitter.split_documents(data)
         logger.info(f"Splitted the document into {len(documents)} chunks")
 
-        return documents
+        return documents, len(documents)
     
     except Exception as e:
         logger.error(f"An error occurred in prepare_chunk: {str(e)}")

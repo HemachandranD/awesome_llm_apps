@@ -12,6 +12,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 
 # Creating an object
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 def run_llm(model_name: str, user_question: str, vstore_connection):
