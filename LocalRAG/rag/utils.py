@@ -1,5 +1,5 @@
 import streamlit as st
-
+import subprocess
 
 def check_valid_file(file) -> str:
     """Reads an uploaded file and returns a File object"""
@@ -19,7 +19,8 @@ def sidebar():
     with st.sidebar:
         st.markdown(
             "## How to use\n"
-            "1. Follow the [prerequisites](\n"
+            "1. Follow the [prerequisites]()\n"
+            "2. Run the LocalRAG app locally using streamlit\n"
             "2. Upload a pdf, docx, txt or md file📄\n"
             "3. Ask a question about the document💬\n"
         )

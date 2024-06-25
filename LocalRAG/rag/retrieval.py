@@ -51,9 +51,14 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
         )
         retriever = vstore_connection.as_retriever()
 
+        def get_sources(docs):
+            print(docs)
+            return [", ".join(doc.metadata['source'] for doc in docs)]
+
         def format_docs(docs):
             print(docs)
-            return "\n\n".join(doc.page_content for doc in docs['retrieved_docs'])
+            get_sources(docs)
+            return "\n\n".join(doc.page_content for doc in docs)
 
         logger.info("****Building the Chains with Chat History****")
         # source_documents = (rephrase_prompt | llm | StrOutputParser() | retriever)
@@ -64,13 +69,9 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
         # context = itemgetter("question") | retriever | format_docs
         # chain = RunnablePassthrough.assign(context=context) | question_answer_prompt | llm
 
-        def get_sources(docs):
-            print(docs)
-            return [", ".join(doc.metadata['source'] for doc in docs['sources'])]
-
-        logger.info("****Getting Sources****")
-        sources = RunnablePassthrough.assign(sources=source_documents) | get_sources
-        sources.invoke({"question": user_question, "chat_history": ""})
+        # logger.info("****Getting Sources****")
+        # sources = RunnablePassthrough.assign(sources=source_documents) | get_sources
+        # sources.invoke({"question": user_question, "chat_history": ""})
 
         chat_chain = RunnableWithMessageHistory(
             chain,
@@ -82,7 +83,7 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
             {"question": user_question}, config={"configurable": {"session_id": "CR7"}}
-        ), sources
+        )
 
     except Exception as e:
         logger.error(f"An error occurred in load_data: {str(e)}")

@@ -23,7 +23,6 @@ sidebar()
 uploaded_file = st.file_uploader("Upload a File", type=("txt", "md", "pdf", "docx"))
 
 
-# st.session_state['messages']=[]
 def setup():
     if not uploaded_file:
         st.stop()
@@ -53,7 +52,7 @@ def setup():
 def welcome_message():
     # Initialize chat history
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hey, How can I help you with this File?"}
+        {"role": "assistant", "content": "Hey, How can I help you with this File?", "sid": "cr8"}
     ]
     with st.chat_message("assistant"):
         for msg in st.session_state.messages:
@@ -71,15 +70,14 @@ def rag_chat(prompt, model):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating response.."):
-        response, sources = retrieval(
+        response = retrieval(
             model_name=model, user_question=prompt, vstore_connection=None
         )
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
             st.markdown(response)
-        st.info(sources)
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": f"{response.capitalize()}\n\nSource: {', '.join(source for source in sources)}"})
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 
 if __name__ == "__main__":
@@ -87,4 +85,4 @@ if __name__ == "__main__":
         vs_conn = setup()
         welcome_message()
     if prompt := st.chat_input():
-        rag_chat(prompt, model="phi3")
+        rag_chat(prompt, model="llama3")
