@@ -18,6 +18,10 @@ fastapi = "*"
 sse-starlette = "*"
 langchain-qdrant = "*"
 langchain-huggingface = "*"
+redis = "*"
+docx2txt = "*"
+pypdf = "*"
+qdrant-client = "*"
 
 [dev-packages]
 ipykernel = "*"
