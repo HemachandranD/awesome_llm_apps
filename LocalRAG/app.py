@@ -2,6 +2,7 @@ import os
 import time
 
 import streamlit as st
+from rag.utils import sidebar
 from streamlit.logger import get_logger
 
 from localrag import loader, retrieval, vstores
@@ -14,13 +15,13 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     menu_items={"About": "# This is an *extremely* cool Local RAG app!"},
 )
+
 st.header("📝 LocalRAG")
 
-with st.sidebar:
-    # anthropic_api_key = st.text_input("Anthropic API Key", key="file_qa_api_key", type="password")
-    "[View the source code](https://github.com/HemachandranD/awesome_llm_apps/blob/main/LocalRAG/app.py)"
+sidebar()
 
 uploaded_file = st.file_uploader("Upload a File", type=("txt", "md", "pdf", "docx"))
+
 
 # st.session_state['messages']=[]
 def setup():
@@ -48,35 +49,42 @@ def setup():
 
     return vs_conn
 
-def welcome_chat():
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "What do you want to know from this file?"}
+
+def welcome_message():
+    # Initialize chat history
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hey, How can I help you with this File?"}
     ]
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
+    with st.chat_message("assistant"):
+        for msg in st.session_state.messages:
+            st.markdown(msg["content"])
 
 
-def rag_chat():
-    # if "user_prompt_history" not in st.session_state:
-    #     st.session_state["user_prompt_history"] = []
-
-    # if "chat_answers_history" not in st.session_state:
-    #     st.session_state["chat_answers_history"] = []
-
+def rag_chat(prompt, model):
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
-    # st.session_state["user_prompt_history"].append(prompt)
-    st.chat_message("user").write(prompt)
-    response = retrieval(
-        model_name="phi3", user_question=prompt, vstore_connection=None
-    )
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    # st.session_state["chat_answers_history"].append(response)
-    st.chat_message("assistant").write(response)
+    with st.spinner("Generating response.."):
+        response, sources = retrieval(
+            model_name=model, user_question=prompt, vstore_connection=None
+        )
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        st.info(sources)
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": f"{response.capitalize()}\n\nSource: {', '.join(source for source in sources)}"})
 
 
 if __name__ == "__main__":
     if "messages" not in st.session_state:
         vs_conn = setup()
-        welcome_chat()
+        welcome_message()
     if prompt := st.chat_input():
-        rag_chat()
+        rag_chat(prompt, model="phi3")

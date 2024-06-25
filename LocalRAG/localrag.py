@@ -43,12 +43,12 @@ def vstores(documents: List[Document]):
 
 def retrieval(model_name: str, user_question: str, vstore_connection=None):
     try:
-        response = run_llm(
+        response, sources = run_llm(
             model_name=model_name,
             user_question=user_question,
             vstore_connection=vstore_connection,
         )
-        return response.content
+        return response.content, sources
 
     except Exception as e:
         st.info(f"An error occurred in retrieval: {str(e)}")

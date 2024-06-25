@@ -1,5 +1,6 @@
 import logging
 
+import streamlit as st
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_community.chat_models import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
@@ -28,7 +29,8 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
             [
                 (
                     "system",
-                    "Answer any user questions based solely on the context below:<context>\n\n{context}</context>",
+                    """Answer any user questions based solely on the context below:<context>\n\n{context}</context>
+                    If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.""",
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 ("human", "{question}"),
@@ -36,7 +38,7 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
         )
 
         rephrase_prompt = PromptTemplate.from_template(
-            """Given the following conversation and a follow up question, 
+            """Given the following conversation and a follow up question,
         rephrase the follow up question to be a standalone question.\n\nChat History:\n{chat_history}\n
         Follow Up Input: {question}\nStandalone Question:"""
         )
@@ -50,15 +52,25 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
         retriever = vstore_connection.as_retriever()
 
         def format_docs(docs):
-            return "\n\n".join(doc.page_content for doc in docs)
+            print(docs)
+            return "\n\n".join(doc.page_content for doc in docs['retrieved_docs'])
 
         logger.info("****Building the Chains with Chat History****")
-        context = (rephrase_prompt | llm | StrOutputParser()) | retriever | format_docs
+        # source_documents = (rephrase_prompt | llm | StrOutputParser() | retriever)
+        retrieved_docs = (rephrase_prompt | llm | StrOutputParser()) | retriever | format_docs
         chain = (
-            RunnablePassthrough.assign(context=context) | question_answer_prompt | llm
+            RunnablePassthrough.assign(context=retrieved_docs) | question_answer_prompt | llm
         )
         # context = itemgetter("question") | retriever | format_docs
         # chain = RunnablePassthrough.assign(context=context) | question_answer_prompt | llm
+
+        def get_sources(docs):
+            print(docs)
+            return [", ".join(doc.metadata['source'] for doc in docs['sources'])]
+
+        logger.info("****Getting Sources****")
+        sources = RunnablePassthrough.assign(sources=source_documents) | get_sources
+        sources.invoke({"question": user_question, "chat_history": ""})
 
         chat_chain = RunnableWithMessageHistory(
             chain,
@@ -69,9 +81,10 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
 
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
-            {"question": user_question}, config={"configurable": {"session_id": "c8r7"}}
-        )
+            {"question": user_question}, config={"configurable": {"session_id": "CR7"}}
+        ), sources
 
     except Exception as e:
         logger.error(f"An error occurred in load_data: {str(e)}")
+        st.info(f"An error occurred in load_data: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")

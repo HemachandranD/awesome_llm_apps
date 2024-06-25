@@ -1,5 +1,6 @@
 import logging
 
+import streamlit as st
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import Qdrant
 
@@ -29,4 +30,5 @@ def create_vstores(documents: list):
 
     except Exception as e:
         logger.error(f"An error occurred in create_vstores: {str(e)}")
+        st.info(f"An error occurred in create_vstores: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")
