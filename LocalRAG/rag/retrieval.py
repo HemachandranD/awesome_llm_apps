@@ -53,7 +53,7 @@ def run_llm(model_name: str, user_question: str, session_id: str, vstore_connect
 
         def get_sources(docs):
             print(docs)
-            return [", ".join(doc.metadata['source'] for doc in docs)]
+            return [", ".join(doc.metadata["source"] for doc in docs)]
 
         def format_docs(docs):
             print(docs)
@@ -62,9 +62,13 @@ def run_llm(model_name: str, user_question: str, session_id: str, vstore_connect
 
         logger.info("****Building the Chains with Chat History****")
         # source_documents = (rephrase_prompt | llm | StrOutputParser() | retriever)
-        retrieved_docs = (rephrase_prompt | llm | StrOutputParser()) | retriever | format_docs
+        retrieved_docs = (
+            (rephrase_prompt | llm | StrOutputParser()) | retriever | format_docs
+        )
         chain = (
-            RunnablePassthrough.assign(context=retrieved_docs) | question_answer_prompt | llm
+            RunnablePassthrough.assign(context=retrieved_docs)
+            | question_answer_prompt
+            | llm
         )
         # context = itemgetter("question") | retriever | format_docs
         # chain = RunnablePassthrough.assign(context=context) | question_answer_prompt | llm
@@ -82,9 +86,11 @@ def run_llm(model_name: str, user_question: str, session_id: str, vstore_connect
         st.info(session_id)
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
-            {"question": user_question}, config={"configurable": {"session_id": session_id}}
+            {"question": user_question},
+            config={"configurable": {"session_id": session_id}},
         )
 
     except Exception as e:
         logger.error(f"An error occurred in run_llm: {str(e)}")
+        st.info(f"An error occurred in run_llm: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")

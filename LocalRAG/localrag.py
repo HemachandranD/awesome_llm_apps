@@ -41,13 +41,15 @@ def vstores(documents: List[Document]):
         raise SystemExit(f"Exiting due to the error: {str(e)}")
 
 
-def retrieval(model_name: str, user_question: str, session_id: str, vstore_connection=None):
+def retrieval(
+    model_name: str, user_question: str, session_id: str, vstore_connection=None
+):
     try:
         response = run_llm(
             model_name=model_name,
             user_question=user_question,
             vstore_connection=vstore_connection,
-            session_id=session_id
+            session_id=session_id,
         )
         return response.content
 
