@@ -83,7 +83,6 @@ def run_llm(model_name: str, user_question: str, session_id: str, vstore_connect
             input_messages_key="question",
             history_messages_key="chat_history",
         )
-        st.info(session_id)
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
             {"question": user_question},

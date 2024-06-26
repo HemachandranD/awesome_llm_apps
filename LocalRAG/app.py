@@ -71,7 +71,6 @@ def rag_chat(prompt, model):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating response.."):
-        st.info(st.session_state.session_id)
         response = retrieval(
             model_name=model,
             user_question=prompt,
