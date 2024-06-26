@@ -52,11 +52,9 @@ def run_llm(model_name: str, user_question: str, session_id: str, vstore_connect
         retriever = vstore_connection.as_retriever()
 
         def get_sources(docs):
-            print(docs)
             return [", ".join(doc.metadata["source"] for doc in docs)]
 
         def format_docs(docs):
-            print(docs)
             get_sources(docs)
             return "\n\n".join(doc.page_content for doc in docs)
 
