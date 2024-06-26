@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-def run_llm(model_name: str, user_question: str, vstore_connection):
+def run_llm(model_name: str, user_question: str, session_id: str, vstore_connection):
     try:
         logger.info(f"****Setting up {model_name}, Please wait...****")
         llm = ChatOllama(model=model_name)
@@ -79,13 +79,12 @@ def run_llm(model_name: str, user_question: str, vstore_connection):
             input_messages_key="question",
             history_messages_key="chat_history",
         )
-
+        st.info(session_id)
         logger.info("****Invoking the Chain with User Question****")
         return chat_chain.invoke(
-            {"question": user_question}, config={"configurable": {"session_id": "CR7"}}
+            {"question": user_question}, config={"configurable": {"session_id": session_id}}
         )
 
     except Exception as e:
-        logger.error(f"An error occurred in load_data: {str(e)}")
-        st.info(f"An error occurred in load_data: {str(e)}")
+        logger.error(f"An error occurred in run_llm: {str(e)}")
         raise SystemExit(f"Exiting due to the error: {str(e)}")

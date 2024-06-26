@@ -2,7 +2,7 @@ import os
 import time
 
 import streamlit as st
-from rag.utils import sidebar
+from rag.utils import sidebar, _get_session
 from streamlit.logger import get_logger
 
 from localrag import loader, retrieval, vstores
@@ -52,14 +52,14 @@ def setup():
 def welcome_message():
     # Initialize chat history
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hey, How can I help you with this File?", "sid": "cr8"}
+        {"role": "assistant", "content": "Hey, How can I help you with this File?"}
     ]
     with st.chat_message("assistant"):
         for msg in st.session_state.messages:
             st.markdown(msg["content"])
 
 
-def rag_chat(prompt, model):
+def rag_chat(prompt, model, session_id):
     # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -70,8 +70,9 @@ def rag_chat(prompt, model):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.spinner("Generating response.."):
+        st.info(session_id)
         response = retrieval(
-            model_name=model, user_question=prompt, vstore_connection=None
+            model_name=model, user_question=prompt, vstore_connection=None, session_id=session_id
         )
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
@@ -81,8 +82,9 @@ def rag_chat(prompt, model):
 
 
 if __name__ == "__main__":
+    session_id = _get_session()
     if "messages" not in st.session_state:
         vs_conn = setup()
         welcome_message()
     if prompt := st.chat_input():
-        rag_chat(prompt, model="llama3")
+        rag_chat(prompt, model="llama3", session_id=session_id)

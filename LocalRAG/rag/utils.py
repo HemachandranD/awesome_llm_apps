@@ -1,5 +1,6 @@
 import streamlit as st
-import subprocess
+from streamlit.runtime.scriptrunner.script_run_context import get_script_run_ctx
+
 
 def check_valid_file(file) -> str:
     """Reads an uploaded file and returns a File object"""
@@ -13,6 +14,14 @@ def check_valid_file(file) -> str:
         return "Markdown"
     else:
         raise NotImplementedError(f"File type {file.name.split('.')[-1]} not supported")
+
+
+def _get_session():
+    ctx = get_script_run_ctx()
+    session_id = ctx.id
+    if session_id is None:
+        raise RuntimeError("Couldn't get your Streamlit Session object.")
+    return session_id
 
 
 def sidebar():
