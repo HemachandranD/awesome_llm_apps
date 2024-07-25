@@ -66,6 +66,7 @@ You shall notice that the connection to the existing vector store that was creat
 
 Generation is performed based on the retrieved similar embedding vectors from the Query given given by the user. What happens under the hood is the query/question given as an input is turned into an embedding vectors and the similarity search is performed on the vector stores to gather the relative documents. From the retrieved documents the LLM genartes the response.
 
-## Streamlit Application
-![alt text](docs/streamlit.mp4)
+## [Streamlit Application](./app.py)
+LocalRAG is a is a cool self-hosting application made by me which enables you to inquire about your documents and receive answers while ensuring the privacy and security of your data.
+![streamlit](docs/LocalRAG_streamlit.gif)
 
