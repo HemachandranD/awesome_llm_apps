@@ -3,7 +3,7 @@ from typing import List, Union, Annotated
 from custom_agent import create_agent_executor
 from fastapi import FastAPI, Body
 from fastapi.responses import RedirectResponse
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableLambda
 from langserve import add_routes
