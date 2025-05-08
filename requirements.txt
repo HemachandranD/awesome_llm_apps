@@ -22,5 +22,5 @@ numpy>=1.25.0
 faiss-cpu>=1.7.0
 sentence_transformers>=4.1.0
 newsapi-python>=0.2.6
-langserver>=0.1.0
 sse_starlette>=0.1.0
+langserve>=0.3.1

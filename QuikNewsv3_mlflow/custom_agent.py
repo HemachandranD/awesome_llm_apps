@@ -8,6 +8,11 @@ from langchain.prompts import (
 )
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
 
+import mlflow
+
+# replace with your own URI
+tracking_uri = "http://localhost:5000"
+mlflow.set_tracking_uri(tracking_uri)
 
 def create_agent_executor():
     try:
